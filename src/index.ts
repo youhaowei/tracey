@@ -1,5 +1,6 @@
-export { logger, getRecentLogs, clearLogs } from "./logger"
+export { logger, createLogger, initTracey } from "./logger"
 export { WideEvent } from "./wide-event"
 export { withLogging } from "./server-fn"
 export { logDbInit, createDbEvent } from "./db"
-export type { WideEventFields } from "./types"
+export { getRecentLogs, getRingBuffer } from "./ring-buffer"
+export type { WideEventFields, TraceyConfig, FileTransportOptions, LogEntry } from "./types"

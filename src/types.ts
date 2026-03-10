@@ -1,3 +1,25 @@
+export interface FileTransportOptions {
+  dir: string
+  prefix?: string
+  flushOnCrash?: boolean
+}
+
+export interface TraceyConfig {
+  level?: string
+  redact?: boolean
+  file?: FileTransportOptions
+  ringBuffer?: number | false
+  crashHandlers?: boolean
+}
+
+export interface LogEntry {
+  level: number
+  time: number
+  component?: string
+  msg: string
+  [key: string]: unknown
+}
+
 export interface WideEventFields {
   // Request context
   event_name: string
