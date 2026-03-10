@@ -1,4 +1,4 @@
-export { logger } from "./logger"
+export { logger, getRecentLogs, clearLogs } from "./logger"
 export { WideEvent } from "./wide-event"
 export { withLogging } from "./server-fn"
 export { logDbInit, createDbEvent } from "./db"
