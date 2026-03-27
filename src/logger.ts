@@ -1,5 +1,7 @@
 import pino from "pino"
 import { Writable } from "stream"
+import { mkdirSync, createWriteStream } from "fs"
+import { join } from "path"
 import type { TraceyConfig, LogEntry } from "./types"
 import { initRingBuffer } from "./ring-buffer"
 
@@ -90,9 +92,6 @@ function createConfiguredLogger(config: TraceyConfig) {
 
   // File transport
   if (config.file) {
-    const { mkdirSync, createWriteStream } = require("fs") as typeof import("fs")
-    const { join } = require("path") as typeof import("path")
-
     mkdirSync(config.file.dir, { recursive: true })
 
     const prefix = config.file.prefix ?? "app"
