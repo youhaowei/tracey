@@ -64,7 +64,7 @@ function createDefaultLogger() {
   })
 }
 
-function createConfiguredLogger(config: TraceyConfig) {
+async function createConfiguredLogger(config: TraceyConfig) {
   const isDev = process.env.NODE_ENV !== "production"
   const level = config.level ?? process.env.LOG_LEVEL ?? (isDev ? "debug" : "info")
   const shouldRedact = config.redact !== false
@@ -88,10 +88,10 @@ function createConfiguredLogger(config: TraceyConfig) {
     streams.push({ level: level as pino.Level, stream: process.stdout })
   }
 
-  // File transport
+  // File transport — fs/path loaded lazily to keep module usable without filesystem
   if (config.file) {
-    const { mkdirSync, createWriteStream } = require("fs") as typeof import("fs")
-    const { join } = require("path") as typeof import("path")
+    const { mkdirSync, createWriteStream } = await import("fs")
+    const { join } = await import("path")
 
     mkdirSync(config.file.dir, { recursive: true })
 
@@ -171,8 +171,8 @@ export const logger: pino.Logger = new Proxy({} as pino.Logger, {
   },
 })
 
-export function initTracey(config: TraceyConfig) {
-  g.__tracey_logger__ = createConfiguredLogger(config)
+export async function initTracey(config: TraceyConfig) {
+  g.__tracey_logger__ = await createConfiguredLogger(config)
 }
 
 export function createLogger(name: string) {
