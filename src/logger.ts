@@ -46,12 +46,11 @@ export function redactDeep(obj: unknown): unknown {
 }
 
 function createDefaultLogger() {
-  const isDev = process.env.NODE_ENV !== "production"
-  const level = process.env.LOG_LEVEL ?? (isDev ? "debug" : "info")
+  const level = process.env.LOG_LEVEL ?? (shouldUsePrettyTransport() ? "debug" : "info")
 
   return pino({
     level,
-    ...(isDev && {
+    ...(shouldUsePrettyTransport() && {
       transport: {
         target: "pino-pretty",
         options: {
@@ -65,14 +64,14 @@ function createDefaultLogger() {
 }
 
 async function createConfiguredLogger(config: TraceyConfig) {
-  const isDev = process.env.NODE_ENV !== "production"
-  const level = config.level ?? process.env.LOG_LEVEL ?? (isDev ? "debug" : "info")
+  const usePrettyTransport = shouldUsePrettyTransport()
+  const level = config.level ?? process.env.LOG_LEVEL ?? (usePrettyTransport ? "debug" : "info")
   const shouldRedact = config.redact !== false
 
   const streams: pino.StreamEntry[] = []
 
   // Stdout stream (pretty in dev, JSON in prod)
-  if (isDev) {
+  if (usePrettyTransport) {
     streams.push({
       level: level as pino.Level,
       stream: pino.transport({
@@ -144,6 +143,14 @@ async function createConfiguredLogger(config: TraceyConfig) {
   )
 
   return pinoLogger
+}
+
+function shouldUsePrettyTransport(): boolean {
+  if (process.env.LOG_PRETTY === "1") return true
+  if (process.env.LOG_PRETTY === "0") return false
+  if (process.env.NODE_ENV === "production") return false
+  if (!process.stdout?.isTTY) return false
+  return !Boolean(process.versions?.electron)
 }
 
 // Mutable reference behind globalThis — survives HMR
