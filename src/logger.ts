@@ -46,11 +46,12 @@ export function redactDeep(obj: unknown): unknown {
 }
 
 function createDefaultLogger() {
-  const level = process.env.LOG_LEVEL ?? (shouldUsePrettyTransport() ? "debug" : "info")
+  const usePrettyTransport = shouldUsePrettyTransport()
+  const level = process.env.LOG_LEVEL ?? (usePrettyTransport ? "debug" : "info")
 
   return pino({
     level,
-    ...(shouldUsePrettyTransport() && {
+    ...(usePrettyTransport && {
       transport: {
         target: "pino-pretty",
         options: {
@@ -150,6 +151,8 @@ function shouldUsePrettyTransport(): boolean {
   if (process.env.LOG_PRETTY === "0") return false
   if (process.env.NODE_ENV === "production") return false
   if (!process.stdout?.isTTY) return false
+  // Disable in all Electron contexts (dev and packaged) — DevTools is the
+  // preferred output channel there. Use LOG_PRETTY=1 to force-enable.
   return !Boolean(process.versions?.electron)
 }
 
